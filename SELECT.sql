@@ -10,7 +10,7 @@ limit 1
 -- Название треков, продолжительность которых не менее 3,5 минут
 select name
 from track
-where duration >= 3.5
+where duration >= 3.5 * 60
 
 -- Названия сборников, вышедших в период с 2018 по 2020 год включительно
 select name
@@ -23,9 +23,9 @@ from artist
 where array_length(regexp_split_to_array(name, '\s+'), 1) = 1;
 
 -- Название треков, которые содержат слово «мой» или «my»
-select name
-from track
-where lower(name) like '%my%'
+SELECT name FROM track
+WHERE string_to_array(lower(name), ' ')  && ARRAY['my','мой'];
+
 
 -- Задание 3
 
@@ -47,9 +47,13 @@ group by a.title
 
 --Все исполнители, которые не выпустили альбомы в 2020 году
 select a.name
-from artist a join artist_album aa on a.id = aa.artist_id 
-join album al on al.id  = aa.album_id
-where al.year_of_release <> 2020
+from artist a
+where a.name not in (
+    select a2.name
+    from artist a2 join artist_album aa on a2.id = aa.artist_id 
+	join album al on al.id  = aa.album_id
+	where al.year_of_release = 2020
+);
 
 --Названия сборников, в которых присутствует конкретный исполнитель (Billie Eilish)
 select c.name
